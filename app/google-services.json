@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1037500146079",
+    "project_id": "razmenium",
+    "storage_bucket": "razmenium.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1037500146079:android:91bf19ad58e077f6ceddaa",
+        "android_client_info": {
+          "package_name": "com.razmenium.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDm2WuS2HN5B5tf4hLUL9jBJgACQ7mXoFY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
