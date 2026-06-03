@@ -1,3 +1,25 @@
 <resources>
-    <string name="app_name">Razmenium</string>
+    <string name="app_name">Размениум</string>
+    <string name="slogan">Размени вештина. Размени ум.</string>
+    <string name="email">Е-пошта</string>
+    <string name="password">Лозинка</string>
+    <string name="login">Логирај се</string>
+    <string name="register">Регистрирај се</string>
+    <string name="or_continue_with">или продолжи со</string>
+    <string name="continue_google">Продолжи со Google</string>
+    <string name="continue_anonymous">Продолжи анонимно</string>
+    <string name="new_listing">Нов оглас</string>
+    <string name="what_offering">Што нудам?</string>
+    <string name="what_seeking">Што барам?</string>
+    <string name="description">Опис (опционо)</string>
+    <string name="publish">Објави оглас</string>
+    <string name="my_profile">Мој профил</string>
+    <string name="logout">Одјави се</string>
+    <string name="profile">Профил</string>
+    <string name="enter_email_password">Внеси е-пошта и лозинка</string>
+    <string name="listing_published">Огласот е објавен!</string>
+    <string name="enter_offering_seeking">Внеси што нудаш и што бараш</string>
+    <string name="anonymous_user">Анонимен корисник</string>
+    <string name="email_label">Е-пошта: </string>
+    <string name="id_label">ID: </string>
 </resources>
