@@ -12,7 +12,20 @@
           "package_name": "com.razmenium.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1037500146079-j5nkjmr3nnbhea9qno2v9d292jok4089.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.razmenium.app",
+            "certificate_hash": "6257e8cee6a93ad5aae2cfba491f9fb0c84b0fde"
+          }
+        },
+        {
+          "client_id": "1037500146079-pckb32llh5fi2sun7ttoce3bphqcj75v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDm2WuS2HN5B5tf4hLUL9jBJgACQ7mXoFY"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1037500146079-pckb32llh5fi2sun7ttoce3bphqcj75v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
