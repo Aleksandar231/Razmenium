@@ -21,5 +21,5 @@ Kotlin, Firebase (Auth, Firestore, Messaging, Analytics), Room, Material Design
 
 ## За проектот
 
-Проект по предметот ПМП, летен семестар 2026
+Проект по предметот ПМП,
 ФИКТ — Универзитет УКЛО
