@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="#F5F5F5">
 
-    <!-- Top App Bar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -20,9 +19,15 @@
             app:titleTextColor="@android:color/white"
             app:menu="@menu/menu_home"/>
 
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:padding="8dp"/>
+
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Листа на огласи -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvListings"
         android:layout_width="match_parent"
@@ -30,7 +35,6 @@
         android:padding="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-    <!-- Додај оглас копче -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
         android:layout_width="wrap_content"

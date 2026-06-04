@@ -3,7 +3,9 @@ package com.razmenium.app
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
@@ -16,6 +18,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private lateinit var recyclerView: RecyclerView
+    private var allListings = listOf<Listing>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +33,15 @@ class HomeActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.rvListings)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
+        val searchView = findViewById<SearchView>(R.id.searchView)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?) = false
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filterListings(newText ?: "")
+                return true
+            }
+        })
+
         val fabAdd = findViewById<FloatingActionButton>(R.id.fabAdd)
         fabAdd.setOnClickListener {
             startActivity(Intent(this, AddListingActivity::class.java))
@@ -38,15 +50,50 @@ class HomeActivity : AppCompatActivity() {
         loadListings()
     }
 
+    private fun filterListings(query: String) {
+        val filtered = if (query.isEmpty()) {
+            allListings
+        } else {
+            allListings.filter {
+                it.offering.contains(query, ignoreCase = true) ||
+                        it.seeking.contains(query, ignoreCase = true) ||
+                        it.description.contains(query, ignoreCase = true)
+            }
+        }
+        recyclerView.adapter = ListingAdapter(filtered) { listing ->
+            saveFavorite(listing)
+        }
+    }
+
+    private fun saveFavorite(listing: Listing) {
+        Thread {
+            val localListing = LocalListing(
+                id = listing.id,
+                userId = listing.userId,
+                userName = listing.userName,
+                offering = listing.offering,
+                seeking = listing.seeking,
+                description = listing.description,
+                timestamp = listing.timestamp
+            )
+            AppDatabase.getDatabase(this).listingDao().insertListing(localListing)
+            runOnUiThread {
+                Toast.makeText(this, "Зачувано во омилени!", Toast.LENGTH_SHORT).show()
+            }
+        }.start()
+    }
+
     private fun loadListings() {
         db.collection("listings")
             .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) return@addSnapshotListener
-                val listings = snapshot?.documents?.mapNotNull { doc ->
+                allListings = snapshot?.documents?.mapNotNull { doc ->
                     doc.toObject(Listing::class.java)?.copy(id = doc.id)
                 } ?: emptyList()
-                recyclerView.adapter = ListingAdapter(listings)
+                recyclerView.adapter = ListingAdapter(allListings) { listing ->
+                    saveFavorite(listing)
+                }
             }
     }
 
