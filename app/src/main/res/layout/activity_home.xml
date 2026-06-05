@@ -23,8 +23,10 @@
             android:id="@+id/searchView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:padding="8dp"/>
+            android:background="?android:attr/windowBackground"
+            android:padding="8dp"
+            app:queryHint="Пребарај..."
+            app:queryBackground="@android:color/transparent"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -49,6 +49,21 @@ class HomeActivity : AppCompatActivity() {
             }
         })
 
+        val searchEditText = searchView.findViewById<android.widget.EditText>(
+            androidx.appcompat.R.id.search_src_text
+        )
+
+        val isDarkMode = resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        if (isDarkMode) {
+            searchEditText.setTextColor(resources.getColor(android.R.color.white, theme))
+            searchEditText.setHintTextColor(resources.getColor(android.R.color.darker_gray, theme))
+        } else {
+            searchEditText.setTextColor(resources.getColor(android.R.color.black, theme))
+            searchEditText.setHintTextColor(resources.getColor(android.R.color.darker_gray, theme))
+        }
         val fabAdd = findViewById<FloatingActionButton>(R.id.fabAdd)
         fabAdd.setOnClickListener {
             startActivity(Intent(this, AddListingActivity::class.java))
