@@ -22,8 +22,8 @@ class ProfileActivity : AppCompatActivity() {
         val btnLogout = findViewById<Button>(R.id.btnLogout)
 
         val user = auth.currentUser
-        tvEmail.text = "Е-пошта: ${user?.email ?: "Анонимен корисник"}"
-        tvUserId.text = "ID: ${user?.uid ?: ""}"
+        tvEmail.text = "${getString(R.string.email_label)}${user?.email ?: getString(R.string.anonymous_user)}"
+        tvUserId.text = "${getString(R.string.id_label)}${user?.uid ?: ""}"
 
         btnLogout.setOnClickListener {
             auth.signOut()

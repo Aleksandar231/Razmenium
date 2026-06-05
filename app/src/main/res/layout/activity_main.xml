@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Размениум"
+            android:text="@string/app_name"
             android:textSize="36sp"
             android:textStyle="bold"
             android:textColor="#1A237E"
@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Размени вештина. Размени ум."
+            android:text="@string/slogan"
             android:textSize="14sp"
             android:textColor="#757575"
             android:layout_marginBottom="48dp"/>
@@ -33,7 +33,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Е-пошта"
+            android:hint="@string/email"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="16dp">
 
@@ -48,7 +48,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Лозинка"
+            android:hint="@string/password"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:passwordToggleEnabled="true"
             android:layout_marginBottom="24dp"
@@ -66,7 +66,7 @@
             android:id="@+id/btnLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Логирај се"
+            android:text="@string/login"
             android:backgroundTint="#1A237E"
             android:layout_marginBottom="12dp"/>
 
@@ -75,14 +75,14 @@
             android:id="@+id/btnRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Регистрирај се"
+            android:text="@string/register"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_marginBottom="24dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="или продолжи со"
+            android:text="@string/or_continue_with"
             android:textColor="#757575"
             android:layout_marginBottom="16dp"/>
 
@@ -91,7 +91,7 @@
             android:id="@+id/btnGoogle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Продолжи со Google"
+            android:text="@string/continue_google"
             android:backgroundTint="#DB4437"
             android:layout_marginBottom="12dp"/>
 
@@ -100,7 +100,7 @@
             android:id="@+id/btnAnonymous"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Продолжи анонимно"
+            android:text="@string/continue_anonymous"
             android:backgroundTint="#757575"/>
 
     </LinearLayout>

@@ -22,6 +22,13 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val prefs = getSharedPreferences("settings", MODE_PRIVATE)
+        val lang = prefs.getString("language", "mk") ?: "mk"
+        val locale = java.util.Locale(lang)
+        java.util.Locale.setDefault(locale)
+        val config = resources.configuration
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
         setContentView(R.layout.activity_home)
 
         auth = FirebaseAuth.getInstance()
@@ -110,10 +117,26 @@ class HomeActivity : AppCompatActivity() {
                 finish()
                 true
             }
+
             R.id.action_profile -> {
                 startActivity(Intent(this, ProfileActivity::class.java))
                 true
             }
+
+            R.id.action_language -> {
+                val currentLang = resources.configuration.locales[0].language
+                val newLang = if (currentLang == "en") "mk" else "en"
+                val prefs = getSharedPreferences("settings", MODE_PRIVATE)
+                prefs.edit().putString("language", newLang).apply()
+                val newLocale = java.util.Locale(newLang)
+                java.util.Locale.setDefault(newLocale)
+                val config = resources.configuration
+                config.setLocale(newLocale)
+                resources.updateConfiguration(config, resources.displayMetrics)
+                recreate()
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

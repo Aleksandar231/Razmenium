@@ -22,4 +22,6 @@
     <string name="anonymous_user">Анонимен корисник</string>
     <string name="email_label">Е-пошта: </string>
     <string name="id_label">ID: </string>
+    <string name="offering_label">Нудам</string>
+    <string name="seeking_label">Барам</string>
 </resources>

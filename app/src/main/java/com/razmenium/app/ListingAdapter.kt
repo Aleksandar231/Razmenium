@@ -28,8 +28,8 @@ class ListingAdapter(
 
     override fun onBindViewHolder(holder: ListingViewHolder, position: Int) {
         val listing = listings[position]
-        holder.tvOffering.text = "Нудам: ${listing.offering}"
-        holder.tvSeeking.text = "Барам: ${listing.seeking}"
+        holder.tvOffering.text = "${holder.itemView.context.getString(R.string.offering_label)}: ${listing.offering}"
+        holder.tvSeeking.text = "${holder.itemView.context.getString(R.string.seeking_label)}: ${listing.seeking}"
         holder.tvUserName.text = listing.userName
         holder.tvDescription.text = listing.description
 

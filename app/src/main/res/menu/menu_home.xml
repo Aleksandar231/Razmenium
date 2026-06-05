@@ -9,6 +9,11 @@
         app:showAsAction="ifRoom"/>
 
     <item
+        android:id="@+id/action_language"
+        android:title="EN / MK"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/action_logout"
         android:title="Одјави се"
         app:showAsAction="never"/>

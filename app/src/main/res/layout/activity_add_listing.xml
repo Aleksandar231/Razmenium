@@ -13,17 +13,16 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Нов оглас"
+            android:text="@string/new_listing"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="#1A237E"
             android:layout_marginBottom="24dp"/>
 
-        <!-- Нудам -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Што нудам?"
+            android:hint="@string/what_offering"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="16dp">
 
@@ -33,11 +32,10 @@
                 android:layout_height="wrap_content"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Барам -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Што барам?"
+            android:hint="@string/what_seeking"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="16dp">
 
@@ -47,11 +45,10 @@
                 android:layout_height="wrap_content"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Опис -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Опис (опционо)"
+            android:hint="@string/description"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="24dp">
 
@@ -63,12 +60,11 @@
                 android:gravity="top"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Објави копче -->
         <Button
             android:id="@+id/btnPublish"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Објави оглас"
+            android:text="@string/publish"
             android:backgroundTint="#1A237E"/>
 
     </LinearLayout>
