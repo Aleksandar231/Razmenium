@@ -6,10 +6,15 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ListingAdapter(
     private val listings: List<Listing>,
-    private val onFavoriteClick: ((Listing) -> Unit)? = null
+    private val onFavoriteClick: ((Listing) -> Unit)? = null,
+    private val onDeleteClick: ((Listing) -> Unit)? = null
 ) : RecyclerView.Adapter<ListingAdapter.ListingViewHolder>() {
 
     class ListingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -17,7 +22,9 @@ class ListingAdapter(
         val tvSeeking: TextView = itemView.findViewById(R.id.tvSeeking)
         val tvUserName: TextView = itemView.findViewById(R.id.tvUserName)
         val tvDescription: TextView = itemView.findViewById(R.id.tvDescription)
+        val tvDate: TextView = itemView.findViewById(R.id.tvDate)
         val btnFavorite: ImageButton = itemView.findViewById(R.id.btnFavorite)
+        val btnDelete: ImageButton = itemView.findViewById(R.id.btnDelete)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListingViewHolder {
@@ -33,8 +40,21 @@ class ListingAdapter(
         holder.tvUserName.text = listing.userName
         holder.tvDescription.text = listing.description
 
-        var isFavorite = false
+        val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
+        holder.tvDate.text = sdf.format(Date(listing.timestamp))
 
+        // Покажи копче за бришење само ако е сопствен оглас
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        if (listing.userId == currentUserId) {
+            holder.btnDelete.visibility = View.VISIBLE
+            holder.btnDelete.setOnClickListener {
+                onDeleteClick?.invoke(listing)
+            }
+        } else {
+            holder.btnDelete.visibility = View.GONE
+        }
+
+        var isFavorite = false
         holder.btnFavorite.setOnClickListener {
             isFavorite = !isFavorite
             if (isFavorite) {

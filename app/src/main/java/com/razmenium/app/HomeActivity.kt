@@ -64,6 +64,7 @@ class HomeActivity : AppCompatActivity() {
             searchEditText.setTextColor(resources.getColor(android.R.color.black, theme))
             searchEditText.setHintTextColor(resources.getColor(android.R.color.darker_gray, theme))
         }
+
         val fabAdd = findViewById<FloatingActionButton>(R.id.fabAdd)
         fabAdd.setOnClickListener {
             startActivity(Intent(this, AddListingActivity::class.java))
@@ -82,9 +83,11 @@ class HomeActivity : AppCompatActivity() {
                         it.description.contains(query, ignoreCase = true)
             }
         }
-        recyclerView.adapter = ListingAdapter(filtered) { listing ->
-            saveFavorite(listing)
-        }
+        recyclerView.adapter = ListingAdapter(
+            listings = filtered,
+            onFavoriteClick = { listing -> saveFavorite(listing) },
+            onDeleteClick = { listing -> deleteListing(listing) }
+        )
     }
 
     private fun saveFavorite(listing: Listing) {
@@ -105,6 +108,17 @@ class HomeActivity : AppCompatActivity() {
         }.start()
     }
 
+    private fun deleteListing(listing: Listing) {
+        db.collection("listings").document(listing.id)
+            .delete()
+            .addOnSuccessListener {
+                Toast.makeText(this, "Огласот е избришан!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Грешка: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
     private fun loadListings() {
         db.collection("listings")
             .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
@@ -113,9 +127,11 @@ class HomeActivity : AppCompatActivity() {
                 allListings = snapshot?.documents?.mapNotNull { doc ->
                     doc.toObject(Listing::class.java)?.copy(id = doc.id)
                 } ?: emptyList()
-                recyclerView.adapter = ListingAdapter(allListings) { listing ->
-                    saveFavorite(listing)
-                }
+                recyclerView.adapter = ListingAdapter(
+                    listings = allListings,
+                    onFavoriteClick = { listing -> saveFavorite(listing) },
+                    onDeleteClick = { listing -> deleteListing(listing) }
+                )
             }
     }
 
@@ -132,12 +148,10 @@ class HomeActivity : AppCompatActivity() {
                 finish()
                 true
             }
-
             R.id.action_profile -> {
                 startActivity(Intent(this, ProfileActivity::class.java))
                 true
             }
-
             R.id.action_language -> {
                 val currentLang = resources.configuration.locales[0].language
                 val newLang = if (currentLang == "en") "mk" else "en"
@@ -151,7 +165,6 @@ class HomeActivity : AppCompatActivity() {
                 recreate()
                 true
             }
-
             else -> super.onOptionsItemSelected(item)
         }
     }

@@ -36,6 +36,14 @@
                 android:src="@android:drawable/btn_star_big_off"
                 android:background="?attr/selectableItemBackgroundBorderless"/>
 
+            <ImageButton
+                android:id="@+id/btnDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_delete"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:visibility="gone"/>
+
         </LinearLayout>
 
         <TextView
@@ -63,6 +71,13 @@
             android:textColor="#757575"
             android:textSize="14sp"/>
 
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#9E9E9E"
+            android:textSize="12sp"
+            android:layout_marginTop="8dp"/>
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
