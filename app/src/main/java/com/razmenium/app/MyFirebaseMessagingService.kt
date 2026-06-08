@@ -23,6 +23,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        android.util.Log.d("FCM_TOKEN", "Token: $token")
     }
 
     private fun showNotification(title: String, body: String) {

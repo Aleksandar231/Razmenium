@@ -96,6 +96,10 @@ class MainActivity : AppCompatActivity() {
             val googleSignInClient = GoogleSignIn.getClient(this, gso)
             googleSignInLauncher.launch(googleSignInClient.signInIntent)
         }
+        com.google.firebase.messaging.FirebaseMessaging.getInstance().token
+            .addOnSuccessListener { token ->
+                android.util.Log.d("FCM_TOKEN", "Token: $token")
+            }
     }
 
     private fun goToHome() {
