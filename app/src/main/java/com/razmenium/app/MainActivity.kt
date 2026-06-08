@@ -6,16 +6,23 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var callbackManager: CallbackManager
 
     private val googleSignInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -39,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         auth = FirebaseAuth.getInstance()
+        callbackManager = CallbackManager.Factory.create()
 
         if (auth.currentUser != null) {
             goToHome()
@@ -51,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         val btnRegister = findViewById<Button>(R.id.btnRegister)
         val btnGoogle = findViewById<Button>(R.id.btnGoogle)
         val btnAnonymous = findViewById<Button>(R.id.btnAnonymous)
+        val btnFacebook = findViewById<Button>(R.id.btnFacebook)
 
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
@@ -96,10 +105,37 @@ class MainActivity : AppCompatActivity() {
             val googleSignInClient = GoogleSignIn.getClient(this, gso)
             googleSignInLauncher.launch(googleSignInClient.signInIntent)
         }
+
+        // Facebook логирање
+        LoginManager.getInstance().registerCallback(callbackManager,
+            object : FacebookCallback<LoginResult> {
+                override fun onSuccess(result: LoginResult) {
+                    val credential = FacebookAuthProvider.getCredential(result.accessToken.token)
+                    auth.signInWithCredential(credential)
+                        .addOnSuccessListener { goToHome() }
+                        .addOnFailureListener {
+                            Toast.makeText(this@MainActivity, "Грешка: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
+                override fun onCancel() {}
+                override fun onError(error: FacebookException) {
+                    Toast.makeText(this@MainActivity, "Facebook грешка: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+
+        btnFacebook.setOnClickListener {
+            LoginManager.getInstance().logInWithReadPermissions(this, callbackManager, listOf("public_profile"))
+        }
+
         com.google.firebase.messaging.FirebaseMessaging.getInstance().token
             .addOnSuccessListener { token ->
                 android.util.Log.d("FCM_TOKEN", "Token: $token")
             }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        callbackManager.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun goToHome() {

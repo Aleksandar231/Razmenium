@@ -22,7 +22,14 @@ class ProfileActivity : AppCompatActivity() {
         val btnLogout = findViewById<Button>(R.id.btnLogout)
 
         val user = auth.currentUser
-        tvEmail.text = "${getString(R.string.email_label)}${user?.email ?: getString(R.string.anonymous_user)}"
+        val displayName = user?.displayName
+        val email = user?.email
+        val name = when {
+            displayName != null -> displayName
+            email != null -> email
+            else -> getString(R.string.anonymous_user)
+        }
+        tvEmail.text = "${getString(R.string.email_label)}$name"
         tvUserId.text = "${getString(R.string.id_label)}${user?.uid ?: ""}"
 
         btnLogout.setOnClickListener {

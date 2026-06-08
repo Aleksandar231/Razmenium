@@ -24,4 +24,7 @@
     <string name="id_label">ID: </string>
     <string name="offering_label">Нудам</string>
     <string name="seeking_label">Барам</string>
+    <string name="facebook_app_id">2203403743761954</string>
+    <string name="fb_login_protocol_scheme">fb2203403743761954</string>
+    <string name="facebook_client_token">7e812b3c574c38c08aa287d190d1357c</string>
 </resources>
