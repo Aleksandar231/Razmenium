@@ -8,23 +8,65 @@
     <string name="or_continue_with">или продолжи со</string>
     <string name="continue_google">Продолжи со Google</string>
     <string name="continue_anonymous">Продолжи анонимно</string>
+    <string name="continue_facebook">Продолжи со Facebook</string>
+
     <string name="new_listing">Нов оглас</string>
+    <string name="edit_listing">Измени оглас</string>
     <string name="what_offering">Што нудам?</string>
     <string name="what_seeking">Што барам?</string>
     <string name="description">Опис (опционо)</string>
     <string name="publish">Објави оглас</string>
+    <string name="save_changes">Зачувај измени</string>
+
     <string name="my_profile">Мој профил</string>
     <string name="logout">Одјави се</string>
     <string name="profile">Профил</string>
-    <string name="enter_email_password">Внеси е-пошта и лозинка</string>
+    <string name="favorites">Омилени</string>
+    <string name="my_favorites">Мои омилени</string>
+    <string name="search_hint">Пребарај…</string>
+    <string name="dark_mode">Темна / светла тема</string>
+    <string name="language_switch">EN / MK</string>
+
+    <string name="field_required">Задолжително поле</string>
+    <string name="error_invalid_email">Внеси валидна е-пошта</string>
+    <string name="error_short_password">Лозинката мора да има барем 6 знаци</string>
+    <string name="error_invalid_credentials">Погрешна е-пошта или лозинка</string>
+    <string name="error_email_in_use">Веќе постои сметка со оваа е-пошта</string>
+    <string name="error_weak_password">Лозинката е премногу слаба</string>
+    <string name="error_network">Нема интернет конекција</string>
+    <string name="error_generic">Нешто тргна наопаку. Обиди се повторно.</string>
+    <string name="error_loading_listings">Грешка при вчитување на огласите</string>
+
     <string name="listing_published">Огласот е објавен!</string>
-    <string name="enter_offering_seeking">Внеси што нудаш и што бараш</string>
+    <string name="listing_updated">Огласот е изменет!</string>
+    <string name="listing_deleted">Огласот е избришан!</string>
+    <string name="delete_listing_title">Избриши оглас</string>
+    <string name="delete_listing_message">Дали си сигурен дека сакаш да го избришеш огласот?</string>
+    <string name="delete">Избриши</string>
+    <string name="cancel">Откажи</string>
+    <string name="edit">Измени</string>
+    <string name="favorite">Омилен</string>
+    <string name="back">Назад</string>
+
+    <string name="saved_to_favorites">Зачувано во омилени!</string>
+    <string name="removed_from_favorites">Отстрането од омилени</string>
+    <string name="no_favorites">Сè уште немаш омилени огласи</string>
+    <string name="no_listings">Сè уште нема огласи. Биди прв!</string>
+    <string name="no_search_results">Нема резултати за пребарувањето</string>
+
     <string name="anonymous_user">Анонимен корисник</string>
-    <string name="email_label">Е-пошта: </string>
-    <string name="id_label">ID: </string>
-    <string name="offering_label">Нудам</string>
-    <string name="seeking_label">Барам</string>
-    <string name="facebook_app_id">2203403743761954</string>
-    <string name="fb_login_protocol_scheme">fb2203403743761954</string>
-    <string name="facebook_client_token">7e812b3c574c38c08aa287d190d1357c</string>
+    <string name="profile_email_format">Е-пошта: %1$s</string>
+    <string name="profile_id_format">ID: %1$s</string>
+    <string name="offering_format">Нудам: %1$s</string>
+    <string name="seeking_format">Барам: %1$s</string>
+    <string name="my_listings_count">Мои огласи: %1$d</string>
+    <string name="favorites_count">Омилени: %1$d</string>
+
+    <string name="notification_channel_name">Размениум нотификации</string>
+    <string name="notification_default_title">Размениум</string>
+    <string name="notification_default_body">Нова порака</string>
+
+    <string name="facebook_app_id" translatable="false">2203403743761954</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb2203403743761954</string>
+    <string name="facebook_client_token" translatable="false">7e812b3c574c38c08aa287d190d1357c</string>
 </resources>

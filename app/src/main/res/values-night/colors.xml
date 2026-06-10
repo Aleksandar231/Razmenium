@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand">#8C9EFF</color>
+    <color name="offering_green">#81C784</color>
+    <color name="seeking_red">#E57373</color>
+    <color name="text_muted">#B0B0B0</color>
+</resources>

@@ -1,171 +1,168 @@
 package com.razmenium.app
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.razmenium.app.databinding.ActivityHomeBinding
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : BaseActivity() {
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
-    private lateinit var recyclerView: RecyclerView
-    private var allListings = listOf<Listing>()
+    private lateinit var binding: ActivityHomeBinding
+    private lateinit var adapter: ListingAdapter
+
+    private val viewModel: HomeViewModel by viewModels()
+
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val prefs = getSharedPreferences("settings", MODE_PRIVATE)
-        val lang = prefs.getString("language", "mk") ?: "mk"
-        val locale = java.util.Locale(lang)
-        java.util.Locale.setDefault(locale)
-        val config = resources.configuration
-        config.setLocale(locale)
-        resources.updateConfiguration(config, resources.displayMetrics)
-        setContentView(R.layout.activity_home)
+        binding = ActivityHomeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        auth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance()
+        setSupportActionBar(binding.toolbar)
+        askNotificationPermission()
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        adapter = ListingAdapter(
+            onFavoriteClick = { listing -> viewModel.toggleFavorite(listing) },
+            onEditClick = { listing -> openEdit(listing) },
+            onDeleteClick = { listing -> confirmDelete(listing) }
+        )
+        binding.rvListings.layoutManager = LinearLayoutManager(this)
+        binding.rvListings.adapter = adapter
 
-        recyclerView = findViewById(R.id.rvListings)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
-        val searchView = findViewById<SearchView>(R.id.searchView)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?) = false
             override fun onQueryTextChange(newText: String?): Boolean {
-                filterListings(newText ?: "")
+                viewModel.setSearchQuery(newText.orEmpty())
                 return true
             }
         })
 
-        val searchEditText = searchView.findViewById<android.widget.EditText>(
-            androidx.appcompat.R.id.search_src_text
-        )
-
-        val isDarkMode = resources.configuration.uiMode and
-                android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
-                android.content.res.Configuration.UI_MODE_NIGHT_YES
-
-        if (isDarkMode) {
-            searchEditText.setTextColor(resources.getColor(android.R.color.white, theme))
-            searchEditText.setHintTextColor(resources.getColor(android.R.color.darker_gray, theme))
-        } else {
-            searchEditText.setTextColor(resources.getColor(android.R.color.black, theme))
-            searchEditText.setHintTextColor(resources.getColor(android.R.color.darker_gray, theme))
-        }
-
-        val fabAdd = findViewById<FloatingActionButton>(R.id.fabAdd)
-        fabAdd.setOnClickListener {
+        binding.fabAdd.setOnClickListener {
             startActivity(Intent(this, AddListingActivity::class.java))
         }
 
-        loadListings()
+        observeViewModel()
     }
 
-    private fun filterListings(query: String) {
-        val filtered = if (query.isEmpty()) {
-            allListings
-        } else {
-            allListings.filter {
-                it.offering.contains(query, ignoreCase = true) ||
-                        it.seeking.contains(query, ignoreCase = true) ||
-                        it.description.contains(query, ignoreCase = true)
+    private fun observeViewModel() {
+        viewModel.listings.observe(this) { items ->
+            adapter.submitList(items)
+            val showEmpty = items.isEmpty() && viewModel.isLoading.value != true
+            binding.emptyState.visibility = if (showEmpty) View.VISIBLE else View.GONE
+            binding.tvEmptyText.text = getString(
+                when {
+                    viewModel.loadFailed -> R.string.error_loading_listings
+                    viewModel.hasQuery -> R.string.no_search_results
+                    else -> R.string.no_listings
+                }
+            )
+        }
+
+        viewModel.isLoading.observe(this) { loading ->
+            binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+        }
+
+        viewModel.favoriteIds.observe(this) { ids ->
+            adapter.favoriteIds = ids
+        }
+
+        viewModel.toastMessage.observe(this) { resId ->
+            if (resId != null) {
+                Toast.makeText(this, resId, Toast.LENGTH_SHORT).show()
+                viewModel.onToastShown()
             }
         }
-        recyclerView.adapter = ListingAdapter(
-            listings = filtered,
-            onFavoriteClick = { listing -> saveFavorite(listing) },
-            onDeleteClick = { listing -> deleteListing(listing) }
-        )
     }
 
-    private fun saveFavorite(listing: Listing) {
-        Thread {
-            val localListing = LocalListing(
-                id = listing.id,
-                userId = listing.userId,
-                userName = listing.userName,
-                offering = listing.offering,
-                seeking = listing.seeking,
-                description = listing.description,
-                timestamp = listing.timestamp
-            )
-            AppDatabase.getDatabase(this).listingDao().insertListing(localListing)
-            runOnUiThread {
-                Toast.makeText(this, "Зачувано во омилени!", Toast.LENGTH_SHORT).show()
-            }
-        }.start()
+    private fun openEdit(listing: Listing) {
+        val intent = Intent(this, AddListingActivity::class.java).apply {
+            putExtra(AddListingActivity.EXTRA_ID, listing.id)
+            putExtra(AddListingActivity.EXTRA_OFFERING, listing.offering)
+            putExtra(AddListingActivity.EXTRA_SEEKING, listing.seeking)
+            putExtra(AddListingActivity.EXTRA_DESCRIPTION, listing.description)
+        }
+        startActivity(intent)
     }
 
-    private fun deleteListing(listing: Listing) {
-        db.collection("listings").document(listing.id)
-            .delete()
-            .addOnSuccessListener {
-                Toast.makeText(this, "Огласот е избришан!", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Грешка: ${it.message}", Toast.LENGTH_SHORT).show()
-            }
+    private fun confirmDelete(listing: Listing) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.delete_listing_title)
+            .setMessage(R.string.delete_listing_message)
+            .setPositiveButton(R.string.delete) { _, _ -> viewModel.deleteListing(listing) }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
-    private fun loadListings() {
-        db.collection("listings")
-            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) return@addSnapshotListener
-                allListings = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(Listing::class.java)?.copy(id = doc.id)
-                } ?: emptyList()
-                recyclerView.adapter = ListingAdapter(
-                    listings = allListings,
-                    onFavoriteClick = { listing -> saveFavorite(listing) },
-                    onDeleteClick = { listing -> deleteListing(listing) }
-                )
-            }
-    }
-
-    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_home, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_logout -> {
-                auth.signOut()
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
+            R.id.action_favorites -> {
+                startActivity(Intent(this, FavoritesActivity::class.java))
                 true
             }
             R.id.action_profile -> {
                 startActivity(Intent(this, ProfileActivity::class.java))
                 true
             }
+            R.id.action_dark_mode -> {
+                toggleDarkMode()
+                true
+            }
             R.id.action_language -> {
-                val currentLang = resources.configuration.locales[0].language
-                val newLang = if (currentLang == "en") "mk" else "en"
-                val prefs = getSharedPreferences("settings", MODE_PRIVATE)
-                prefs.edit().putString("language", newLang).apply()
-                val newLocale = java.util.Locale(newLang)
-                java.util.Locale.setDefault(newLocale)
-                val config = resources.configuration
-                config.setLocale(newLocale)
-                resources.updateConfiguration(config, resources.displayMetrics)
+                val newLang = if (LocaleHelper.getLanguage(this) == "en") "mk" else "en"
+                LocaleHelper.setLanguage(this, newLang)
                 recreate()
                 true
             }
+            R.id.action_logout -> {
+                logoutAndExit()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun toggleDarkMode() {
+        // Се проверува моменталниот изглед (не зачуваниот режим) — така toggle-от
+        // работи правилно и кога темата следи систем кој е веќе темен
+        val isNightNow = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+                Configuration.UI_MODE_NIGHT_YES
+        val newMode = if (isNightNow) {
+            AppCompatDelegate.MODE_NIGHT_NO
+        } else {
+            AppCompatDelegate.MODE_NIGHT_YES
+        }
+        getSharedPreferences(RazmeniumApp.PREFS_NAME, MODE_PRIVATE)
+            .edit().putInt(RazmeniumApp.KEY_NIGHT_MODE, newMode).apply()
+        AppCompatDelegate.setDefaultNightMode(newMode)
+    }
+
+    private fun askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 }

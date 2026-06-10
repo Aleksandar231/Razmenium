@@ -1,41 +1,53 @@
 package com.razmenium.app
 
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
+import com.razmenium.app.databinding.ActivityProfileBinding
+import kotlinx.coroutines.launch
 
-class ProfileActivity : AppCompatActivity() {
+class ProfileActivity : BaseActivity() {
 
+    private lateinit var binding: ActivityProfileBinding
     private lateinit var auth: FirebaseAuth
+    private val repository by lazy { ListingRepository(applicationContext) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_profile)
+        binding = ActivityProfileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
-
-        val tvEmail = findViewById<TextView>(R.id.tvEmail)
-        val tvUserId = findViewById<TextView>(R.id.tvUserId)
-        val btnLogout = findViewById<Button>(R.id.btnLogout)
+        binding.toolbar.setNavigationOnClickListener { finish() }
 
         val user = auth.currentUser
-        val displayName = user?.displayName
-        val email = user?.email
-        val name = when {
-            displayName != null -> displayName
-            email != null -> email
-            else -> getString(R.string.anonymous_user)
-        }
-        tvEmail.text = "${getString(R.string.email_label)}$name"
-        tvUserId.text = "${getString(R.string.id_label)}${user?.uid ?: ""}"
+        binding.tvName.text = user?.displayName
+            ?: user?.email
+            ?: getString(R.string.anonymous_user)
+        binding.tvEmail.text = getString(
+            R.string.profile_email_format,
+            user?.email ?: getString(R.string.anonymous_user)
+        )
+        binding.tvUserId.text = getString(R.string.profile_id_format, user?.uid.orEmpty())
 
-        btnLogout.setOnClickListener {
-            auth.signOut()
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+        binding.tvMyListingsCount.text = getString(R.string.my_listings_count, 0)
+        binding.tvFavoritesCount.text = getString(R.string.favorites_count, 0)
+
+        lifecycleScope.launch {
+            binding.tvFavoritesCount.text =
+                getString(R.string.favorites_count, repository.favoritesCount())
+
+            val uid = user?.uid
+            if (uid != null) {
+                try {
+                    binding.tvMyListingsCount.text =
+                        getString(R.string.my_listings_count, repository.countUserListings(uid))
+                } catch (_: Exception) {
+                    // без интернет — остави 0
+                }
+            }
         }
+
+        binding.btnLogout.setOnClickListener { logoutAndExit() }
     }
 }

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="?android:attr/windowBackground">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -14,10 +14,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#1A237E"
+            android:background="@color/brand_primary"
             app:title="@string/app_name"
-            app:titleTextColor="@android:color/white"
-            app:menu="@menu/menu_home"/>
+            app:titleTextColor="@android:color/white"/>
 
         <androidx.appcompat.widget.SearchView
             android:id="@+id/searchView"
@@ -25,7 +24,7 @@
             android:layout_height="wrap_content"
             android:background="?android:attr/windowBackground"
             android:padding="8dp"
-            app:queryHint="Пребарај..."
+            app:queryHint="@string/search_hint"
             app:queryBackground="@android:color/transparent"/>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -35,7 +34,40 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp"
+        android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:id="@+id/emptyState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/ic_empty"
+            android:contentDescription="@string/no_listings"/>
+
+        <TextView
+            android:id="@+id/tvEmptyText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/no_listings"
+            android:textSize="16sp"
+            android:textColor="@color/text_muted"/>
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
@@ -43,7 +75,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="#1A237E"/>
+        android:src="@drawable/ic_add"
+        android:contentDescription="@string/new_listing"
+        app:tint="@android:color/white"
+        app:backgroundTint="@color/brand_primary"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
