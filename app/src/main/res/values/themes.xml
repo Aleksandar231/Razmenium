@@ -1,10 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.Razmenium" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.Razmenium" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">#1A237E</item>
         <item name="colorPrimaryVariant">#000051</item>
         <item name="colorOnPrimary">@android:color/white</item>
         <item name="colorSecondary">#536DFE</item>
         <item name="colorSecondaryVariant">#0043CA</item>
-        <item name="colorOnSecondary">@android:color/black</item>
+        <item name="colorOnSecondary">@android:color/white</item>
     </style>
 </resources>

@@ -1,70 +1,88 @@
 package com.razmenium.app
 
+import android.annotation.SuppressLint
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.razmenium.app.databinding.ItemListingBinding
 
 class ListingAdapter(
-    private val listings: List<Listing>,
-    private val onFavoriteClick: ((Listing) -> Unit)? = null,
-    private val onDeleteClick: ((Listing) -> Unit)? = null
-) : RecyclerView.Adapter<ListingAdapter.ListingViewHolder>() {
+    private val onFavoriteClick: (Listing) -> Unit,
+    private val onEditClick: ((Listing) -> Unit)? = null,
+    private val onDeleteClick: ((Listing) -> Unit)? = null,
+    private val showOwnerActions: Boolean = true
+) : ListAdapter<Listing, ListingAdapter.ListingViewHolder>(DIFF_CALLBACK) {
 
-    class ListingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvOffering: TextView = itemView.findViewById(R.id.tvOffering)
-        val tvSeeking: TextView = itemView.findViewById(R.id.tvSeeking)
-        val tvUserName: TextView = itemView.findViewById(R.id.tvUserName)
-        val tvDescription: TextView = itemView.findViewById(R.id.tvDescription)
-        val tvDate: TextView = itemView.findViewById(R.id.tvDate)
-        val btnFavorite: ImageButton = itemView.findViewById(R.id.btnFavorite)
-        val btnDelete: ImageButton = itemView.findViewById(R.id.btnDelete)
-    }
+    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+    /** Сет од ID-а на омилени огласи — ѕвездичката останува и по скролање. */
+    var favoriteIds: Set<String> = emptySet()
+        @SuppressLint("NotifyDataSetChanged")
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    class ListingViewHolder(val binding: ItemListingBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListingViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_listing, parent, false)
-        return ListingViewHolder(view)
+        val binding = ItemListingBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
+        return ListingViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ListingViewHolder, position: Int) {
-        val listing = listings[position]
-        holder.tvOffering.text = "${holder.itemView.context.getString(R.string.offering_label)}: ${listing.offering}"
-        holder.tvSeeking.text = "${holder.itemView.context.getString(R.string.seeking_label)}: ${listing.seeking}"
-        holder.tvUserName.text = listing.userName
-        holder.tvDescription.text = listing.description
+        val listing = getItem(position)
+        val binding = holder.binding
+        val context = binding.root.context
 
-        val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-        holder.tvDate.text = sdf.format(Date(listing.timestamp))
+        binding.tvUserName.text = listing.userName
+        binding.tvOffering.text = context.getString(R.string.offering_format, listing.offering)
+        binding.tvSeeking.text = context.getString(R.string.seeking_format, listing.seeking)
 
-        // Покажи копче за бришење само ако е сопствен оглас
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-        if (listing.userId == currentUserId) {
-            holder.btnDelete.visibility = View.VISIBLE
-            holder.btnDelete.setOnClickListener {
-                onDeleteClick?.invoke(listing)
-            }
+        binding.tvDescription.text = listing.description
+        binding.tvDescription.visibility =
+            if (listing.description.isBlank()) View.GONE else View.VISIBLE
+
+        if (listing.timestamp > 0) {
+            binding.tvDate.visibility = View.VISIBLE
+            binding.tvDate.text = DateUtils.getRelativeTimeSpanString(
+                listing.timestamp,
+                System.currentTimeMillis(),
+                DateUtils.MINUTE_IN_MILLIS
+            )
         } else {
-            holder.btnDelete.visibility = View.GONE
+            binding.tvDate.visibility = View.GONE
         }
 
-        var isFavorite = false
-        holder.btnFavorite.setOnClickListener {
-            isFavorite = !isFavorite
-            if (isFavorite) {
-                holder.btnFavorite.setImageResource(android.R.drawable.btn_star_big_on)
-                onFavoriteClick?.invoke(listing)
-            } else {
-                holder.btnFavorite.setImageResource(android.R.drawable.btn_star_big_off)
-            }
-        }
+        val isFavorite = listing.id in favoriteIds
+        binding.btnFavorite.setImageResource(
+            if (isFavorite) R.drawable.ic_star_filled else R.drawable.ic_star_outline
+        )
+        binding.btnFavorite.setOnClickListener { onFavoriteClick(listing) }
+
+        // Измена и бришење само за сопствените огласи
+        val isOwner = showOwnerActions && listing.userId == currentUserId
+        binding.btnEdit.visibility = if (isOwner && onEditClick != null) View.VISIBLE else View.GONE
+        binding.btnDelete.visibility = if (isOwner && onDeleteClick != null) View.VISIBLE else View.GONE
+        binding.btnEdit.setOnClickListener { onEditClick?.invoke(listing) }
+        binding.btnDelete.setOnClickListener { onDeleteClick?.invoke(listing) }
     }
 
-    override fun getItemCount() = listings.size
+    companion object {
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Listing>() {
+            override fun areItemsTheSame(oldItem: Listing, newItem: Listing) =
+                oldItem.id == newItem.id
+
+            override fun areContentsTheSame(oldItem: Listing, newItem: Listing) =
+                oldItem == newItem
+        }
+    }
 }

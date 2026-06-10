@@ -3,4 +3,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="purple_700">#1A237E</color>
+
+    <!-- Брендски бои — со посветли варијанти во values-night за читливост во темна тема -->
+    <color name="brand">#1A237E</color>
+    <color name="brand_dark">#000051</color>
+    <color name="offering_green">#2E7D32</color>
+    <color name="seeking_red">#C62828</color>
+    <color name="favorite_amber">#FFC107</color>
+    <color name="text_muted">#757575</color>
 </resources>

@@ -2,10 +2,10 @@ package com.razmenium.app
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
+import android.util.Patterns
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
@@ -14,13 +14,19 @@ import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.GoogleAuthProvider
+import com.razmenium.app.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
+    private lateinit var binding: ActivityMainBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var callbackManager: CallbackManager
 
@@ -31,73 +37,54 @@ class MainActivity : AppCompatActivity() {
         try {
             val account = task.getResult(ApiException::class.java)
             val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+            setLoading(true)
             auth.signInWithCredential(credential)
                 .addOnSuccessListener { goToHome() }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Грешка: ${it.message}", Toast.LENGTH_SHORT).show()
-                }
+                .addOnFailureListener { showAuthError(it) }
         } catch (e: ApiException) {
-            Toast.makeText(this, "Google грешка: ${e.message}", Toast.LENGTH_SHORT).show()
+            showAuthError(e)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
         auth = FirebaseAuth.getInstance()
         callbackManager = CallbackManager.Factory.create()
 
+        // Ако корисникот е веќе логиран, оди директно на почетниот екран
         if (auth.currentUser != null) {
             goToHome()
             return
         }
 
-        val etEmail = findViewById<TextInputEditText>(R.id.etEmail)
-        val etPassword = findViewById<TextInputEditText>(R.id.etPassword)
-        val btnLogin = findViewById<Button>(R.id.btnLogin)
-        val btnRegister = findViewById<Button>(R.id.btnRegister)
-        val btnGoogle = findViewById<Button>(R.id.btnGoogle)
-        val btnAnonymous = findViewById<Button>(R.id.btnAnonymous)
-        val btnFacebook = findViewById<Button>(R.id.btnFacebook)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        btnLogin.setOnClickListener {
-            val email = etEmail.text.toString().trim()
-            val password = etPassword.text.toString().trim()
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Внеси е-пошта и лозинка", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            auth.signInWithEmailAndPassword(email, password)
+        binding.btnLogin.setOnClickListener {
+            if (!validateInput()) return@setOnClickListener
+            setLoading(true)
+            auth.signInWithEmailAndPassword(email(), password())
                 .addOnSuccessListener { goToHome() }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Грешка: ${it.message}", Toast.LENGTH_SHORT).show()
-                }
+                .addOnFailureListener { showAuthError(it) }
         }
 
-        btnRegister.setOnClickListener {
-            val email = etEmail.text.toString().trim()
-            val password = etPassword.text.toString().trim()
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Внеси е-пошта и лозинка", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            auth.createUserWithEmailAndPassword(email, password)
+        binding.btnRegister.setOnClickListener {
+            if (!validateInput()) return@setOnClickListener
+            setLoading(true)
+            auth.createUserWithEmailAndPassword(email(), password())
                 .addOnSuccessListener { goToHome() }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Грешка: ${it.message}", Toast.LENGTH_SHORT).show()
-                }
+                .addOnFailureListener { showAuthError(it) }
         }
 
-        btnAnonymous.setOnClickListener {
+        binding.btnAnonymous.setOnClickListener {
+            setLoading(true)
             auth.signInAnonymously()
                 .addOnSuccessListener { goToHome() }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Грешка: ${it.message}", Toast.LENGTH_SHORT).show()
-                }
+                .addOnFailureListener { showAuthError(it) }
         }
 
-        btnGoogle.setOnClickListener {
+        binding.btnGoogle.setOnClickListener {
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -111,31 +98,77 @@ class MainActivity : AppCompatActivity() {
             object : FacebookCallback<LoginResult> {
                 override fun onSuccess(result: LoginResult) {
                     val credential = FacebookAuthProvider.getCredential(result.accessToken.token)
+                    setLoading(true)
                     auth.signInWithCredential(credential)
                         .addOnSuccessListener { goToHome() }
-                        .addOnFailureListener {
-                            Toast.makeText(this@MainActivity, "Грешка: ${it.message}", Toast.LENGTH_SHORT).show()
-                        }
+                        .addOnFailureListener { showAuthError(it) }
                 }
+
                 override fun onCancel() {}
+
                 override fun onError(error: FacebookException) {
-                    Toast.makeText(this@MainActivity, "Facebook грешка: ${error.message}", Toast.LENGTH_SHORT).show()
+                    showAuthError(error)
                 }
             })
 
-        btnFacebook.setOnClickListener {
-            LoginManager.getInstance().logInWithReadPermissions(this, callbackManager, listOf("public_profile"))
+        binding.btnFacebook.setOnClickListener {
+            LoginManager.getInstance()
+                .logInWithReadPermissions(this, callbackManager, listOf("public_profile"))
         }
-
-        com.google.firebase.messaging.FirebaseMessaging.getInstance().token
-            .addOnSuccessListener { token ->
-                android.util.Log.d("FCM_TOKEN", "Token: $token")
-            }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         callbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun email() = binding.etEmail.text.toString().trim()
+
+    private fun password() = binding.etPassword.text.toString().trim()
+
+    private fun validateInput(): Boolean {
+        binding.tilEmail.error = null
+        binding.tilPassword.error = null
+
+        var valid = true
+        if (email().isEmpty()) {
+            binding.tilEmail.error = getString(R.string.field_required)
+            valid = false
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email()).matches()) {
+            binding.tilEmail.error = getString(R.string.error_invalid_email)
+            valid = false
+        }
+        if (password().isEmpty()) {
+            binding.tilPassword.error = getString(R.string.field_required)
+            valid = false
+        } else if (password().length < 6) {
+            binding.tilPassword.error = getString(R.string.error_short_password)
+            valid = false
+        }
+        return valid
+    }
+
+    private fun setLoading(loading: Boolean) {
+        binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+        binding.btnLogin.isEnabled = !loading
+        binding.btnRegister.isEnabled = !loading
+        binding.btnGoogle.isEnabled = !loading
+        binding.btnAnonymous.isEnabled = !loading
+        binding.btnFacebook.isEnabled = !loading
+    }
+
+    private fun showAuthError(e: Exception) {
+        setLoading(false)
+        val message = when (e) {
+            is FirebaseAuthWeakPasswordException -> getString(R.string.error_weak_password)
+            is FirebaseAuthInvalidCredentialsException -> getString(R.string.error_invalid_credentials)
+            is FirebaseAuthInvalidUserException -> getString(R.string.error_invalid_credentials)
+            is FirebaseAuthUserCollisionException -> getString(R.string.error_email_in_use)
+            is FirebaseNetworkException -> getString(R.string.error_network)
+            else -> e.localizedMessage ?: getString(R.string.error_generic)
+        }
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun goToHome() {

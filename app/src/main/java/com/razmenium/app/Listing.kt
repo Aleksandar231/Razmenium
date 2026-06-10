@@ -9,3 +9,23 @@ data class Listing(
     val description: String = "",
     val timestamp: Long = 0
 )
+
+fun Listing.toLocal() = LocalListing(
+    id = id,
+    userId = userId,
+    userName = userName,
+    offering = offering,
+    seeking = seeking,
+    description = description,
+    timestamp = timestamp
+)
+
+fun LocalListing.toListing() = Listing(
+    id = id,
+    userId = userId,
+    userName = userName,
+    offering = offering,
+    seeking = seeking,
+    description = description,
+    timestamp = timestamp
+)

@@ -11,17 +11,17 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun listingDao(): ListingDao
 
     companion object {
+        @Volatile
         private var INSTANCE: AppDatabase? = null
 
         fun getDatabase(context: Context): AppDatabase {
-            if (INSTANCE == null) {
-                INSTANCE = Room.databaseBuilder(
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
-                    AppDatabase::class.java as Class<AppDatabase>,
+                    AppDatabase::class.java,
                     "razmenium_database"
-                ).allowMainThreadQueries().build()
+                ).build().also { INSTANCE = it }
             }
-            return INSTANCE!!
         }
     }
 }
