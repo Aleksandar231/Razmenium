@@ -10,7 +10,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#1A237E"
+        android:background="@color/brand_primary"
         app:title="@string/new_listing"
         app:titleTextColor="@android:color/white"
         app:navigationIcon="@drawable/ic_back"
@@ -92,7 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/publish"
-                android:backgroundTint="#1A237E"/>
+                android:backgroundTint="@color/brand_primary"/>
 
         </LinearLayout>
     </ScrollView>

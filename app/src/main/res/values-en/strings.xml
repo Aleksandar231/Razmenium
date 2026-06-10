@@ -27,7 +27,6 @@
     <string name="dark_mode">Dark / light theme</string>
     <string name="language_switch">EN / MK</string>
 
-    <string name="enter_email_password">Enter email and password</string>
     <string name="field_required">This field is required</string>
     <string name="error_invalid_email">Enter a valid email address</string>
     <string name="error_short_password">Password must be at least 6 characters</string>
@@ -41,7 +40,6 @@
     <string name="listing_published">Listing published!</string>
     <string name="listing_updated">Listing updated!</string>
     <string name="listing_deleted">Listing deleted!</string>
-    <string name="enter_offering_seeking">Enter what you offer and seek</string>
     <string name="delete_listing_title">Delete listing</string>
     <string name="delete_listing_message">Are you sure you want to delete this listing?</string>
     <string name="delete">Delete</string>

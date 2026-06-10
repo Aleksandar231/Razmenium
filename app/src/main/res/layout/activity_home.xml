@@ -14,7 +14,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#1A237E"
+            android:background="@color/brand_primary"
             app:title="@string/app_name"
             app:titleTextColor="@android:color/white"/>
 
@@ -78,6 +78,6 @@
         android:src="@drawable/ic_add"
         android:contentDescription="@string/new_listing"
         app:tint="@android:color/white"
-        app:backgroundTint="#1A237E"/>
+        app:backgroundTint="@color/brand_primary"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

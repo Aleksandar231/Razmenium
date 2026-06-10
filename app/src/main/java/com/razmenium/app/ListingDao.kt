@@ -24,9 +24,9 @@ interface ListingDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertListing(listing: LocalListing)
 
+    @Query("UPDATE listings SET offering = :offering, seeking = :seeking, description = :description WHERE id = :id")
+    suspend fun updateListing(id: String, offering: String, seeking: String, description: String)
+
     @Query("DELETE FROM listings WHERE id = :id")
     suspend fun deleteListing(id: String)
-
-    @Query("DELETE FROM listings")
-    suspend fun deleteAll()
 }

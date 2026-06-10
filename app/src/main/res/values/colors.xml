@@ -4,6 +4,10 @@
     <color name="white">#FFFFFFFF</color>
     <color name="purple_700">#1A237E</color>
 
+    <!-- Константни бои за toolbar/копчиња (исти во двете теми, текстот врз нив е бел) -->
+    <color name="brand_primary">#1A237E</color>
+    <color name="danger">#C62828</color>
+
     <!-- Брендски бои — со посветли варијанти во values-night за читливост во темна тема -->
     <color name="brand">#1A237E</color>
     <color name="brand_dark">#000051</color>

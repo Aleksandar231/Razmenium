@@ -1,9 +1,7 @@
 package com.razmenium.app
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
-import com.facebook.login.LoginManager
 import com.google.firebase.auth.FirebaseAuth
 import com.razmenium.app.databinding.ActivityProfileBinding
 import kotlinx.coroutines.launch
@@ -50,11 +48,6 @@ class ProfileActivity : BaseActivity() {
             }
         }
 
-        binding.btnLogout.setOnClickListener {
-            auth.signOut()
-            LoginManager.getInstance().logOut()
-            startActivity(Intent(this, MainActivity::class.java))
-            finishAffinity()
-        }
+        binding.btnLogout.setOnClickListener { logoutAndExit() }
     }
 }

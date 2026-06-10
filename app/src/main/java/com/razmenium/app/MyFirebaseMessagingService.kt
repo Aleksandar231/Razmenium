@@ -30,7 +30,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun showNotification(title: String, body: String) {
-        val intent = Intent(this, HomeActivity::class.java).apply {
+        // SplashActivity одлучува дали корисникот е логиран — да не се
+        // заобиколи login екранот со допир на нотификација
+        val intent = Intent(this, SplashActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
 

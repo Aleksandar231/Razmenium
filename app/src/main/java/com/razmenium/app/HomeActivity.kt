@@ -1,35 +1,41 @@
 package com.razmenium.app
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.facebook.login.LoginManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.auth.FirebaseAuth
 import com.razmenium.app.databinding.ActivityHomeBinding
 
 class HomeActivity : BaseActivity() {
 
     private lateinit var binding: ActivityHomeBinding
-    private lateinit var auth: FirebaseAuth
     private lateinit var adapter: ListingAdapter
 
     private val viewModel: HomeViewModel by viewModels()
+
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        auth = FirebaseAuth.getInstance()
         setSupportActionBar(binding.toolbar)
+        askNotificationPermission()
 
         adapter = ListingAdapter(
             onFavoriteClick = { listing -> viewModel.toggleFavorite(listing) },
@@ -60,7 +66,11 @@ class HomeActivity : BaseActivity() {
             val showEmpty = items.isEmpty() && viewModel.isLoading.value != true
             binding.emptyState.visibility = if (showEmpty) View.VISIBLE else View.GONE
             binding.tvEmptyText.text = getString(
-                if (viewModel.hasQuery) R.string.no_search_results else R.string.no_listings
+                when {
+                    viewModel.loadFailed -> R.string.error_loading_listings
+                    viewModel.hasQuery -> R.string.no_search_results
+                    else -> R.string.no_listings
+                }
             )
         }
 
@@ -125,7 +135,7 @@ class HomeActivity : BaseActivity() {
                 true
             }
             R.id.action_logout -> {
-                logout()
+                logoutAndExit()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -133,23 +143,26 @@ class HomeActivity : BaseActivity() {
     }
 
     private fun toggleDarkMode() {
-        val prefs = getSharedPreferences(RazmeniumApp.PREFS_NAME, MODE_PRIVATE)
-        val current = prefs.getInt(
-            RazmeniumApp.KEY_NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        )
-        val newMode = if (current == AppCompatDelegate.MODE_NIGHT_YES) {
+        // Се проверува моменталниот изглед (не зачуваниот режим) — така toggle-от
+        // работи правилно и кога темата следи систем кој е веќе темен
+        val isNightNow = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+                Configuration.UI_MODE_NIGHT_YES
+        val newMode = if (isNightNow) {
             AppCompatDelegate.MODE_NIGHT_NO
         } else {
             AppCompatDelegate.MODE_NIGHT_YES
         }
-        prefs.edit().putInt(RazmeniumApp.KEY_NIGHT_MODE, newMode).apply()
+        getSharedPreferences(RazmeniumApp.PREFS_NAME, MODE_PRIVATE)
+            .edit().putInt(RazmeniumApp.KEY_NIGHT_MODE, newMode).apply()
         AppCompatDelegate.setDefaultNightMode(newMode)
     }
 
-    private fun logout() {
-        auth.signOut()
-        LoginManager.getInstance().logOut()
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
+    private fun askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 }

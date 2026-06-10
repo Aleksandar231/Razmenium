@@ -27,7 +27,6 @@
     <string name="dark_mode">Темна / светла тема</string>
     <string name="language_switch">EN / MK</string>
 
-    <string name="enter_email_password">Внеси е-пошта и лозинка</string>
     <string name="field_required">Задолжително поле</string>
     <string name="error_invalid_email">Внеси валидна е-пошта</string>
     <string name="error_short_password">Лозинката мора да има барем 6 знаци</string>
@@ -41,7 +40,6 @@
     <string name="listing_published">Огласот е објавен!</string>
     <string name="listing_updated">Огласот е изменет!</string>
     <string name="listing_deleted">Огласот е избришан!</string>
-    <string name="enter_offering_seeking">Внеси што нудиш и што бараш</string>
     <string name="delete_listing_title">Избриши оглас</string>
     <string name="delete_listing_message">Дали си сигурен дека сакаш да го избришеш огласот?</string>
     <string name="delete">Избриши</string>

@@ -34,16 +34,23 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val hasQuery: Boolean
         get() = searchQuery.isNotBlank()
 
+    var loadFailed: Boolean = false
+        private set
+
     init {
         registration = repository.listenToListings(
             onChange = { items ->
                 allListings = items
+                loadFailed = false
                 isLoading.value = false
                 applyFilter()
             },
             onError = {
+                loadFailed = true
                 isLoading.value = false
                 toastMessage.value = R.string.error_loading_listings
+                // Повторно емитувај за екранот да не остане празен без порака
+                applyFilter()
             }
         )
     }
@@ -67,9 +74,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     fun toggleFavorite(listing: Listing) {
         viewModelScope.launch {
-            val added = repository.toggleFavorite(listing)
-            toastMessage.value =
-                if (added) R.string.saved_to_favorites else R.string.removed_from_favorites
+            try {
+                val added = repository.toggleFavorite(listing)
+                toastMessage.value =
+                    if (added) R.string.saved_to_favorites else R.string.removed_from_favorites
+            } catch (e: Exception) {
+                toastMessage.value = R.string.error_generic
+            }
         }
     }
 

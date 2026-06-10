@@ -29,13 +29,13 @@ class FavoritesActivity : BaseActivity() {
                 viewModel.remove(listing)
                 Toast.makeText(this, R.string.removed_from_favorites, Toast.LENGTH_SHORT).show()
             },
-            showOwnerActions = false
+            showOwnerActions = false,
+            allItemsFavorite = true
         )
         binding.rvFavorites.layoutManager = LinearLayoutManager(this)
         binding.rvFavorites.adapter = adapter
 
         viewModel.favorites.observe(this) { items ->
-            adapter.favoriteIds = items.map { it.id }.toSet()
             adapter.submitList(items)
             binding.emptyState.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
         }

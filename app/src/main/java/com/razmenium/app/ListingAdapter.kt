@@ -15,10 +15,13 @@ class ListingAdapter(
     private val onFavoriteClick: (Listing) -> Unit,
     private val onEditClick: ((Listing) -> Unit)? = null,
     private val onDeleteClick: ((Listing) -> Unit)? = null,
-    private val showOwnerActions: Boolean = true
+    private val showOwnerActions: Boolean = true,
+    private val allItemsFavorite: Boolean = false
 ) : ListAdapter<Listing, ListingAdapter.ListingViewHolder>(DIFF_CALLBACK) {
 
-    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    // Се чита при секое бинд-ување за да го одразува живото auth-стање
+    private val currentUserId: String?
+        get() = FirebaseAuth.getInstance().currentUser?.uid
 
     /** Сет од ID-а на омилени огласи — ѕвездичката останува и по скролање. */
     var favoriteIds: Set<String> = emptySet()
@@ -62,7 +65,7 @@ class ListingAdapter(
             binding.tvDate.visibility = View.GONE
         }
 
-        val isFavorite = listing.id in favoriteIds
+        val isFavorite = allItemsFavorite || listing.id in favoriteIds
         binding.btnFavorite.setImageResource(
             if (isFavorite) R.drawable.ic_star_filled else R.drawable.ic_star_outline
         )

@@ -76,7 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/login"
-            android:backgroundTint="#1A237E"
+            android:backgroundTint="@color/brand_primary"
             android:layout_marginBottom="12dp"/>
 
         <!-- Регистрирај се копче -->

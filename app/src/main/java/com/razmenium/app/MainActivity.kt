@@ -13,6 +13,7 @@ import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FacebookAuthProvider
@@ -42,7 +43,10 @@ class MainActivity : BaseActivity() {
                 .addOnSuccessListener { goToHome() }
                 .addOnFailureListener { showAuthError(it) }
         } catch (e: ApiException) {
-            showAuthError(e)
+            // Откажување од корисникот не е грешка
+            if (e.statusCode != GoogleSignInStatusCodes.SIGN_IN_CANCELLED) {
+                showAuthError(e)
+            }
         }
     }
 
@@ -62,7 +66,7 @@ class MainActivity : BaseActivity() {
         setContentView(binding.root)
 
         binding.btnLogin.setOnClickListener {
-            if (!validateInput()) return@setOnClickListener
+            if (!validateInput(forRegister = false)) return@setOnClickListener
             setLoading(true)
             auth.signInWithEmailAndPassword(email(), password())
                 .addOnSuccessListener { goToHome() }
@@ -70,7 +74,7 @@ class MainActivity : BaseActivity() {
         }
 
         binding.btnRegister.setOnClickListener {
-            if (!validateInput()) return@setOnClickListener
+            if (!validateInput(forRegister = true)) return@setOnClickListener
             setLoading(true)
             auth.createUserWithEmailAndPassword(email(), password())
                 .addOnSuccessListener { goToHome() }
@@ -127,22 +131,24 @@ class MainActivity : BaseActivity() {
 
     private fun password() = binding.etPassword.text.toString().trim()
 
-    private fun validateInput(): Boolean {
+    private fun validateInput(forRegister: Boolean): Boolean {
         binding.tilEmail.error = null
         binding.tilPassword.error = null
 
+        // Строга валидација само при регистрација — за логирање нека одлучи
+        // Firebase, за да не блокираме постоечки сметки со поинаков формат
         var valid = true
         if (email().isEmpty()) {
             binding.tilEmail.error = getString(R.string.field_required)
             valid = false
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(email()).matches()) {
+        } else if (forRegister && !Patterns.EMAIL_ADDRESS.matcher(email()).matches()) {
             binding.tilEmail.error = getString(R.string.error_invalid_email)
             valid = false
         }
         if (password().isEmpty()) {
             binding.tilPassword.error = getString(R.string.field_required)
             valid = false
-        } else if (password().length < 6) {
+        } else if (forRegister && password().length < 6) {
             binding.tilPassword.error = getString(R.string.error_short_password)
             valid = false
         }

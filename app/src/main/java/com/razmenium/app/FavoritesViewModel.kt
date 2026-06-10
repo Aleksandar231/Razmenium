@@ -20,7 +20,11 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun remove(listing: Listing) {
         viewModelScope.launch {
-            repository.removeFavorite(listing.id)
+            try {
+                repository.removeFavorite(listing.id)
+            } catch (_: Exception) {
+                // ретка грешка во локалната база — листата останува непроменета
+            }
         }
     }
 }

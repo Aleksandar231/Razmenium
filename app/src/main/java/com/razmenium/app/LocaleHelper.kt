@@ -9,16 +9,15 @@ import java.util.Locale
  */
 object LocaleHelper {
 
-    private const val PREFS_NAME = "settings"
     private const val KEY_LANGUAGE = "language"
     const val DEFAULT_LANGUAGE = "mk"
 
     fun getLanguage(context: Context): String =
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        context.getSharedPreferences(RazmeniumApp.PREFS_NAME, Context.MODE_PRIVATE)
             .getString(KEY_LANGUAGE, DEFAULT_LANGUAGE) ?: DEFAULT_LANGUAGE
 
     fun setLanguage(context: Context, language: String) {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        context.getSharedPreferences(RazmeniumApp.PREFS_NAME, Context.MODE_PRIVATE)
             .edit().putString(KEY_LANGUAGE, language).apply()
     }
 

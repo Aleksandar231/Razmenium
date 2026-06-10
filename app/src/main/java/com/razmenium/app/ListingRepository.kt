@@ -1,6 +1,7 @@
 package com.razmenium.app
 
 import android.content.Context
+import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
@@ -38,8 +39,18 @@ class ListingRepository(context: Context) {
         db.collection(COLLECTION_LISTINGS).add(listing).await()
     }
 
-    suspend fun updateListing(id: String, fields: Map<String, Any>) {
-        db.collection(COLLECTION_LISTINGS).document(id).update(fields).await()
+    suspend fun updateListing(id: String, offering: String, seeking: String, description: String) {
+        db.collection(COLLECTION_LISTINGS).document(id).update(
+            mapOf(
+                FIELD_OFFERING to offering,
+                FIELD_SEEKING to seeking,
+                FIELD_DESCRIPTION to description
+            )
+        ).await()
+        // Ако огласот е во омилени, ажурирај ја и локалната копија
+        if (dao.isFavorite(id)) {
+            dao.updateListing(id, offering, seeking, description)
+        }
     }
 
     suspend fun deleteListing(id: String) {
@@ -51,7 +62,10 @@ class ListingRepository(context: Context) {
     suspend fun countUserListings(userId: String): Int =
         db.collection(COLLECTION_LISTINGS)
             .whereEqualTo(FIELD_USER_ID, userId)
-            .get().await().size()
+            .count()
+            .get(AggregateSource.SERVER)
+            .await()
+            .count.toInt()
 
     fun favorites(): Flow<List<LocalListing>> = dao.getAllListings()
 

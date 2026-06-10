@@ -6,7 +6,9 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.razmenium.app.databinding.ActivityAddListingBinding
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Екран за нов оглас. Ако се отвори со EXTRA_ID, работи во режим
@@ -57,41 +59,40 @@ class AddListingActivity : BaseActivity() {
         if (!valid) return
 
         setLoading(true)
+        val isEdit = editListingId != null
         lifecycleScope.launch {
             try {
-                val id = editListingId
-                if (id != null) {
-                    repository.updateListing(
-                        id,
-                        mapOf(
-                            ListingRepository.FIELD_OFFERING to offering,
-                            ListingRepository.FIELD_SEEKING to seeking,
-                            ListingRepository.FIELD_DESCRIPTION to description
+                // Firestore чека потврда од серверот. Без интернет записот се реди
+                // локално и се синхронизира подоцна, па по истек на времето
+                // продолжуваме како успех наместо да виси спинерот засекогаш.
+                withTimeoutOrNull(WRITE_TIMEOUT_MS) {
+                    val id = editListingId
+                    if (id != null) {
+                        repository.updateListing(id, offering, seeking, description)
+                    } else {
+                        val user = FirebaseAuth.getInstance().currentUser
+                        // Константа (не локализиран стринг) — ова се запишува во базата
+                        val userName = user?.displayName ?: user?.email ?: ANONYMOUS_USER_NAME
+                        repository.addListing(
+                            mapOf(
+                                ListingRepository.FIELD_USER_ID to (user?.uid ?: ""),
+                                ListingRepository.FIELD_USER_NAME to userName,
+                                ListingRepository.FIELD_OFFERING to offering,
+                                ListingRepository.FIELD_SEEKING to seeking,
+                                ListingRepository.FIELD_DESCRIPTION to description,
+                                ListingRepository.FIELD_TIMESTAMP to System.currentTimeMillis()
+                            )
                         )
-                    )
-                    Toast.makeText(
-                        this@AddListingActivity, R.string.listing_updated, Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    val user = FirebaseAuth.getInstance().currentUser
-                    val userName = user?.displayName
-                        ?: user?.email
-                        ?: getString(R.string.anonymous_user)
-                    repository.addListing(
-                        mapOf(
-                            ListingRepository.FIELD_USER_ID to (user?.uid ?: ""),
-                            ListingRepository.FIELD_USER_NAME to userName,
-                            ListingRepository.FIELD_OFFERING to offering,
-                            ListingRepository.FIELD_SEEKING to seeking,
-                            ListingRepository.FIELD_DESCRIPTION to description,
-                            ListingRepository.FIELD_TIMESTAMP to System.currentTimeMillis()
-                        )
-                    )
-                    Toast.makeText(
-                        this@AddListingActivity, R.string.listing_published, Toast.LENGTH_SHORT
-                    ).show()
+                    }
                 }
+                Toast.makeText(
+                    this@AddListingActivity,
+                    if (isEdit) R.string.listing_updated else R.string.listing_published,
+                    Toast.LENGTH_SHORT
+                ).show()
                 finish()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 setLoading(false)
                 Toast.makeText(
@@ -111,5 +112,8 @@ class AddListingActivity : BaseActivity() {
         const val EXTRA_OFFERING = "extra_offering"
         const val EXTRA_SEEKING = "extra_seeking"
         const val EXTRA_DESCRIPTION = "extra_description"
+
+        private const val WRITE_TIMEOUT_MS = 8000L
+        private const val ANONYMOUS_USER_NAME = "Анонимен"
     }
 }
